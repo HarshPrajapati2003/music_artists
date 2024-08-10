@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useState, useEffect, useCallback } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 import _ from "lodash";
+import { SkeletonLoaderForCard, SkeletonLoaderForName } from "./SkeletonLoader";
 
 const ITEMS_PER_PAGE=50
 
@@ -9,10 +10,12 @@ const Search = () => {
   const [allArtists, setAllArtists] = useState([]);
   const [pageData, setPageData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [nameLoading, setNameLoading] = useState(false);
   const [page, setPage] = useState(1);
 
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
+  const [exactName, setExactName] = useState("");
 
   const handlePage = (page) => {
     setPage(page);
@@ -39,8 +42,10 @@ const Search = () => {
   // Fuction for searching
   const handleSearch = async (suggestion) => {
     setLoading(true);
+    setSuggestions([]); // Hide the suggestions list
     try {
       // setQuery(suggestion);
+      setExactName(suggestion);
       const res = await axios.get(`/api/artist-by-name/?name=${suggestion}`);
       if (res.status == 200) {
         const { page, totalPages, totalArtists } = res.data;
@@ -60,17 +65,20 @@ const Search = () => {
     _.debounce(async (input) => {
       if (input.length > 0) {
         try {
+          setNameLoading(true)
           const response = await axios.get(`/api/search-artists?q=${input}`);
           const data = await response.data.artistNames;
           console.log("data : ", data);
           setSuggestions(data);
+          setNameLoading(false);
         } catch (error) {
           console.error("Error fetching suggestions:", error);
+          setNameLoading(false);
         }
       } else {
         setSuggestions([]);
       }
-    }, 2000), // Adjust the debounce delay as needed (2000ms here)
+    }, 500), // Adjust the debounce delay as needed (2000ms here)
     []
   );
 
@@ -113,18 +121,15 @@ const Search = () => {
             type="search"
             id="default-search"
             autoComplete="off"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            value={exactName != "" ? exactName : query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setExactName("");
+            }}
             className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             placeholder="Search Music Artists..."
             required=""
           />
-          {/* <button
-            type="submit"
-            className="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-          >
-            Search
-          </button> */}
 
           {/* Suggestion Box */}
           {suggestions.length > 0 && (
@@ -140,30 +145,13 @@ const Search = () => {
               ))}
             </ul>
           )}
+          {/* skeleton loader component for suggestion */}
+          { nameLoading && <SkeletonLoaderForName />}
         </div>
       </form>
 
-      {/* skeleton loader component  */}
-      {loading && (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 md:grid-cols-2 lg:gap-8 mt-5">
-          {Array.from({ length: 8 }).map((_, index) => (
-            <div
-              key={index}
-              className="group relative block bg-gray-300 animate-pulse"
-            >
-              <div className="absolute inset-0 h-full w-full bg-gray-400"></div>
-              <div className="relative p-4 sm:p-6 lg:p-8">
-                <div className="w-1/2 h-6 bg-gray-500 mb-4"></div>
-                <div className="w-1/4 h-4 bg-gray-500 mb-2"></div>
-                <div className="w-1/4 h-4 bg-gray-500 mb-4"></div>
-                <div className="mt-32 sm:mt-48 lg:mt-64">
-                <div className="w-full h-16 bg-gray-500"></div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* skeleton loader component for card */}
+      {loading && <SkeletonLoaderForCard />}
       {/* List of artists */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 md:grid-cols-2 lg:gap-8 mt-5">
         {allArtists.map((artist) => (

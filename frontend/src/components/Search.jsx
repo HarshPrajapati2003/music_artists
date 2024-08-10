@@ -1,38 +1,86 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
+import _ from "lodash";
 
 const ITEMS_PER_PAGE=50
 
 const Search = () => {
-    const [allArtists, setAllArtists] = useState([]);
-    const [pageData, setPageData] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [page,setPage]=useState(1)
-    const handlePage = (page) => {
-       setPage(page);
-       window.scrollTo({ top: 0, left: 0 });
-    };
-    
-    const fetchAllArtists = async (page) => {
-      setLoading(true);
-      try {
-        const res = await axios.get(`/api/all-artists/?page=${page}`);
-        if (res.status == 200) {
-          const { page, totalPages, totalArtists } = res.data;
-          setAllArtists(res.data.artists);
-          setPageData({ page, totalPages, totalArtists });
-          console.log(allArtists);
-          setLoading(false);
-        }
-      } catch (error) {
-        console.log(error);
+  const [allArtists, setAllArtists] = useState([]);
+  const [pageData, setPageData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+
+  const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+
+  const handlePage = (page) => {
+    setPage(page);
+    window.scrollTo({ top: 0, left: 0 });
+  };
+
+  const fetchAllArtists = async (page) => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`/api/all-artists/?page=${page}`);
+      if (res.status == 200) {
+        const { page, totalPages, totalArtists } = res.data;
+        setAllArtists(res.data.artists);
+        setPageData({ page, totalPages, totalArtists });
+        console.log(allArtists);
         setLoading(false);
       }
-    };
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  };
+
+  // Fuction for searching
+  const handleSearch = async (suggestion) => {
+    setLoading(true);
+    try {
+      // setQuery(suggestion);
+      const res = await axios.get(`/api/artist-by-name/?name=${suggestion}`);
+      if (res.status == 200) {
+        const { page, totalPages, totalArtists } = res.data;
+        setAllArtists(res.data.artists);
+        setPageData({ page, totalPages, totalArtists });
+        console.log(allArtists);
+        setLoading(false);
+      }
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  };
+
+  // Debounced function to fetch suggestions
+  const fetchSuggestions = useCallback(
+    _.debounce(async (input) => {
+      if (input.length > 0) {
+        try {
+          const response = await axios.get(`/api/search-artists?q=${input}`);
+          const data = await response.data.artistNames;
+          console.log("data : ", data);
+          setSuggestions(data);
+        } catch (error) {
+          console.error("Error fetching suggestions:", error);
+        }
+      } else {
+        setSuggestions([]);
+      }
+    }, 2000), // Adjust the debounce delay as needed (2000ms here)
+    []
+  );
+
   useEffect(() => {
-      fetchAllArtists(page);
-  },[page])
+    fetchSuggestions(query);
+  }, [query, fetchSuggestions]);
+
+  useEffect(() => {
+    fetchAllArtists(page);
+  }, [page]);
   return (
     <>
       {/* Search input */}
@@ -64,16 +112,34 @@ const Search = () => {
           <input
             type="search"
             id="default-search"
+            autoComplete="off"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
             className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            placeholder="Search Mockups, Logos..."
+            placeholder="Search Music Artists..."
             required=""
           />
-          <button
+          {/* <button
             type="submit"
             className="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
           >
             Search
-          </button>
+          </button> */}
+
+          {/* Suggestion Box */}
+          {suggestions.length > 0 && (
+            <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg dark:bg-gray-700 dark:border-gray-600 max-h-60 overflow-y-auto">
+              {suggestions.map((suggestion, index) => (
+                <li
+                  key={index}
+                  className="px-4 py-2 text-sm text-gray-900 dark:text-white cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
+                  onClick={() => handleSearch(suggestion)}
+                >
+                  {suggestion}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </form>
 
@@ -91,14 +157,13 @@ const Search = () => {
                 <div className="w-1/4 h-4 bg-gray-500 mb-2"></div>
                 <div className="w-1/4 h-4 bg-gray-500 mb-4"></div>
                 <div className="mt-32 sm:mt-48 lg:mt-64">
-                  <div className="w-full h-16 bg-gray-500"></div>
+                <div className="w-full h-16 bg-gray-500"></div>
                 </div>
               </div>
             </div>
           ))}
         </div>
       )}
-
       {/* List of artists */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 md:grid-cols-2 lg:gap-8 mt-5">
         {allArtists.map((artist) => (
@@ -138,7 +203,6 @@ const Search = () => {
           </a>
         ))}
       </div>
-
       {/* Pagination component */}
       {pageData && (
         <>

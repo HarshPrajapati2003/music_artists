@@ -2,19 +2,42 @@ import express from "express";
 const router = express.Router();
 import artistModel from "../model/artist.js";
 
-// GET request to get all artists
+// GET request to get all artists with pagination
 router.get("/all-artists", async (req, res) => {
     try {
-        let artists = await artistModel.find({});
-    
-        res.status(200).json({ success: true, artists: artists });
+        // Get the page and limit from the query parameters, with defaults
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = 50; // Set the limit to 5000 records per page
+
+        // Calculate the starting index for the current page
+        const startIndex = (page - 1) * limit;
+
+        // Retrieve the artists with pagination
+        let artists = await artistModel.find({})
+                                        .skip(startIndex)
+                                        .limit(limit);
+
+        // Optionally, get the total number of artists for the client to know the total pages
+      const totalArtists = await artistModel.countDocuments({});
+      const totalPages = Math.ceil(totalArtists / limit);
+  
+        // Respond with the data and pagination info
+        res.status(200).json({
+            success: true,
+            page: page,
+            totalPages: totalPages,
+            totalArtists: totalArtists,
+            artists: artists
+        });
+
+        console.log(`Page: ${page}, Returned records: ${artists.length}`);
+
     } catch (error) {
-        res
-          .status(400)
-          .json({ success: false, message: "Server error please try later" });
-        console.log("error occured : ",error)
+        res.status(400).json({ success: false, message: "Server error, please try later" });
+        console.log("Error occurred: ", error);
     }
 });
+
 
 // POST request to add a new artist
 router.post("/add-artist", async (req, res) => {

@@ -1,5 +1,5 @@
 import Typesense from "typesense";
-import artists from "./data/data.js";
+import {artists} from "./data/data.js";
 import dotenv from "dotenv";
 
 dotenv.config(); // Load environment variables
@@ -53,6 +53,12 @@ const schema = {
       facet: true,
       optional: false,
     },
+    {
+      name: "name_abbreviation",
+      type: "string",
+      facet: false,
+      optional: false,
+    },
   ],
 };
 
@@ -63,7 +69,7 @@ const loadData = async () => {
     await typesense.collections("artists").retrieve();
     console.log("Found existing collection of artists");
   } catch (err) {
-    console.error("Collection not found or error:", err);
+    console.error("Collection not found or error");
   }
 
   // Create Artist schema if it does not already exist

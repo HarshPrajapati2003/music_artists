@@ -34,43 +34,41 @@ const Search = () => {
     window.scrollTo({ top: 0, left: 0 });
   };
 
-    const calculateTotalPages = (totalArtists, itemsPerPage) => {
-      return Math.ceil(totalArtists / itemsPerPage);
-    };
+  const calculateTotalPages = (totalArtists, itemsPerPage) => {
+    return Math.ceil(totalArtists / itemsPerPage);
+  };
 
+  const fetchAllArtists = async (page) => {
+    setLoading(true);
+    try {
+      const searchParameters = {
+        q: "*",
+        query_by: "artist_names",
+        per_page: ITEMS_PER_PAGE,
+        page: page,
+      };
+      const res = await client
+        .collections("artists")
+        .documents()
+        .search(searchParameters);
 
-const fetchAllArtists = async (page) => {
-  setLoading(true);
-  try {
-    const searchParameters = {
-      q: "*",
-      query_by: "artist_names",
-      per_page: ITEMS_PER_PAGE,
-      page: page,
-    };
-    const res = await client
-      .collections("artists")
-      .documents()
-      .search(searchParameters);
+      // Manually calculate totalPages if not available
+      const totalPages =
+        res.total_pages || calculateTotalPages(res.found, ITEMS_PER_PAGE);
 
-    // Manually calculate totalPages if not available
-    const totalPages =
-      res.total_pages || calculateTotalPages(res.found, ITEMS_PER_PAGE);
-
-    const artists = res.hits.map((hit) => hit.document);
-    setAllArtists(artists);
-    setPageData({
-      page: res.page,
-      totalPages: totalPages,
-      totalArtists: res.found,
-    });
-  } catch (error) {
-    console.log(error);
-  } finally {
-    setLoading(false);
-  }
-};
-
+      const artists = res.hits.map((hit) => hit.document);
+      setAllArtists(artists);
+      setPageData({
+        page: res.page,
+        totalPages: totalPages,
+        totalArtists: res.found,
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Function for searching
   const handleSearch = async (suggestion) => {
@@ -108,7 +106,7 @@ const fetchAllArtists = async (page) => {
         try {
           const searchParameters = {
             q: input,
-            query_by: "artist_names",
+            query_by: "artist_names,name_abbreviation", // Search by both artist names and abbreviations
             per_page: 5, // Limit the number of suggestions
           };
           const res = await client
@@ -125,7 +123,7 @@ const fetchAllArtists = async (page) => {
       } else {
         setSuggestions([]);
       }
-    }, 500), // Adjust the debounce delay as needed
+    }, 400), // Adjust the debounce delay as needed
     []
   );
 
@@ -134,24 +132,30 @@ const fetchAllArtists = async (page) => {
   }, [query, fetchSuggestions]);
 
   useEffect(() => {
-      fetchAllArtists(page);
-      console.log("pageData : ", pageData);
+    fetchAllArtists(page);
+    console.log("pageData : ", pageData);
   }, [page]);
 
   return (
     <>
       {/* Search input */}
-      <form className="max-w-md mx-auto">
+      <form
+        className="max-w-md mx-auto"
+        onSubmit={(e) => {
+          e.preventDefault(); // Prevents the default form submission
+          handleSearch(query); // Calls the search function with the current query
+        }}
+      >
         <label
           htmlFor="default-search"
-          className="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white"
+          className="mb-2 text-sm font-medium text-gray-900 sr-only"
         >
           Search
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
             <svg
-              className="w-4 h-4 text-gray-500 dark:text-gray-400"
+              className="w-4 h-4 text-gray-500"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -175,18 +179,24 @@ const fetchAllArtists = async (page) => {
               setQuery(e.target.value);
               setExactName("");
             }}
-            className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
             placeholder="Search Music Artists..."
             required=""
           />
+          <button
+            type="submit"
+            className="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2"
+          >
+            Search
+          </button>
 
           {/* Suggestion Box */}
           {suggestions.length > 0 && (
-            <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg dark:bg-gray-700 dark:border-gray-600 max-h-60 overflow-y-auto">
+            <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
               {suggestions.map((suggestion, index) => (
                 <li
                   key={index}
-                  className="px-4 py-2 text-sm text-gray-900 dark:text-white cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
+                  className="px-4 py-2 text-sm text-gray-900 cursor-pointer hover:bg-gray-200"
                   onClick={() => handleSearch(suggestion)}
                 >
                   {suggestion}

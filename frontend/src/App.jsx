@@ -1,6 +1,6 @@
 
 import Search from "./components/search";
-
+import TypeSearch from "./components/TypeSearch";
 
 function App() {
 
@@ -14,7 +14,8 @@ function App() {
           </span>{" "}
           Worldwide.
         </h1>
-        <Search />
+        <TypeSearch/>
+        {/* <Search /> */}
       </div>
     </div>
   );

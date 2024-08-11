@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 import _ from "lodash";
 import Typesense from "typesense";
@@ -212,7 +212,7 @@ const fetchAllArtists = async (page) => {
             id={artist.id}
           >
             <img
-              alt=""
+              alt={artist.artist_names}
               src={artist.artist_img}
               className="absolute inset-0 h-full w-full lg:object-cover object-contain opacity-75 transition-opacity group-hover:opacity-50"
             />
@@ -290,20 +290,29 @@ const fetchAllArtists = async (page) => {
                   <span className="sr-only">Previous</span>
                   <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
                 </div>
-                {Array.from({ length: pageData.totalPages }).map((_, i) => (
+                {Array.from({
+                  length:
+                    pageData.totalArtists > 10 ? 10 : pageData.totalArtists,
+                }).map((_, i) => (
                   <div
                     key={i + 1}
                     onClick={() => handlePage(i + 1)}
                     aria-current="page"
                     className={`relative z-10 inline-flex items-center border ${
                       i + 1 === page
-                        ? "bg-indigo-50 border-indigo-500 text-indigo-600"
+                        ? "bg-indigo-600 text-white"
                         : "bg-white border-gray-300 text-gray-500"
                     } px-4 py-2 text-sm font-medium hover:bg-gray-50 cursor-pointer`}
                   >
                     {i + 1}
                   </div>
                 ))}
+
+                {pageData.totalArtists > 10 && (
+                  <span className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 focus:outline-offset-0">
+                    ...
+                  </span>
+                )}
 
                 <div
                   onClick={() =>

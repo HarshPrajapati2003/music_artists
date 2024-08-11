@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState, useEffect, useCallback } from "react";
+import  { useState, useEffect, useCallback } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 import _ from "lodash";
 import { SkeletonLoaderForCard, SkeletonLoaderForName } from "./SkeletonLoader";
@@ -146,7 +146,7 @@ const Search = () => {
             </ul>
           )}
           {/* skeleton loader component for suggestion */}
-          { nameLoading && <SkeletonLoaderForName />}
+          {nameLoading && <SkeletonLoaderForName />}
         </div>
       </form>
 
@@ -162,7 +162,7 @@ const Search = () => {
             id={artist._id}
           >
             <img
-              alt=""
+              alt={artist.artist_names}
               src={artist.artist_img}
               className="absolute inset-0 h-full w-full lg:object-cover object-contain opacity-75 transition-opacity group-hover:opacity-50"
             />

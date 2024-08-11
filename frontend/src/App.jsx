@@ -1,5 +1,5 @@
 
-import Search from "./components/search";
+// import Search from "./components/search";
 import TypeSearch from "./components/TypeSearch";
 
 function App() {

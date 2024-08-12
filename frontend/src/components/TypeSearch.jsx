@@ -79,6 +79,7 @@ const Search = () => {
       const searchParameters = {
         q: suggestion,
         query_by: "artist_names",
+        per_page: 50,
       };
       const res = await client
         .collections("artists")
@@ -88,7 +89,7 @@ const Search = () => {
       setAllArtists(artists);
       setPageData({
         page: res.page,
-        totalPages: res.total_pages,
+        totalPages: Math.ceil(res.found / ITEMS_PER_PAGE) ,
         totalArtists: res.found,
       });
       setLoading(false);
@@ -133,7 +134,7 @@ const Search = () => {
 
   useEffect(() => {
     fetchAllArtists(page);
-    console.log("pageData : ", pageData);
+    // console.log("pageData : ", pageData);
   }, [page]);
 
   return (
@@ -254,22 +255,24 @@ const Search = () => {
       {/* Pagination component */}
       {pageData && (
         <>
-          <div className="flex flex-1 justify-between sm:hidden py-3">
-            <div
-              onClick={() => handlePage(page > 1 ? page - 1 : page)}
-              className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-4 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
-            >
-              Previous
+          {pageData.totalPages > 1 && (
+            <div className="flex flex-1 justify-between sm:hidden py-3">
+              <div
+                onClick={() => handlePage(page > 1 ? page - 1 : page)}
+                className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-4 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
+              >
+                Previous
+              </div>
+              <div
+                onClick={() =>
+                  handlePage(page < pageData.totalPages ? page + 1 : page)
+                }
+                className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
+              >
+                Next
+              </div>
             </div>
-            <div
-              onClick={() =>
-                handlePage(page < pageData.totalPages ? page + 1 : page)
-              }
-              className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
-            >
-              Next
-            </div>
-          </div>
+          )}
           <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between py-7">
             <div>
               <p className="text-sm text-gray-700">
@@ -301,8 +304,7 @@ const Search = () => {
                   <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
                 </div>
                 {Array.from({
-                  length:
-                    pageData.totalArtists > 10 ? 10 : pageData.totalArtists,
+                  length: pageData.totalPages > 10 ? 10 : pageData.totalPages,
                 }).map((_, i) => (
                   <div
                     key={i + 1}
@@ -311,14 +313,14 @@ const Search = () => {
                     className={`relative z-10 inline-flex items-center border ${
                       i + 1 === page
                         ? "bg-indigo-600 text-white"
-                        : "bg-white border-gray-300 text-gray-500"
-                    } px-4 py-2 text-sm font-medium hover:bg-gray-50 cursor-pointer`}
+                        : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
+                    } px-4 py-2 text-sm font-medium cursor-pointer`}
                   >
                     {i + 1}
                   </div>
                 ))}
 
-                {pageData.totalArtists > 10 && (
+                {pageData.totalPages > 10 && (
                   <span className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 focus:outline-offset-0">
                     ...
                   </span>

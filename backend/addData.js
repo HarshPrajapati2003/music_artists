@@ -1,5 +1,5 @@
 import Typesense from "typesense";
-import {artists} from "./data/data.js";
+import { unique_artists } from "./data/ultimate_unique_artists.js";
 import dotenv from "dotenv";
 
 dotenv.config(); // Load environment variables
@@ -21,7 +21,7 @@ const typesense = new Typesense.Client(TYPESENSE_CONFIG);
 
 // Build Schema
 const schema = {
-  name: "artists",
+  name: "unique_artists",
   fields: [
     {
       name: "id",
@@ -66,7 +66,7 @@ const schema = {
 const loadData = async () => {
   // Check if the collection exists
   try {
-    await typesense.collections("artists").retrieve();
+    await typesense.collections("unique_artists").retrieve();
     console.log("Found existing collection of artists");
   } catch (err) {
     console.error("Collection not found or error");
@@ -87,9 +87,9 @@ const loadData = async () => {
 //   Upload artists to Typesense Database
   try {
     const returnData = await typesense
-      .collections("artists")
+      .collections("unique_artists")
       .documents()
-      .import(artists);
+      .import(unique_artists);
     console.log("Artists imported successfully:", returnData);
   } catch (err) {
     console.error("Error importing artists:", err);
@@ -100,13 +100,13 @@ const loadData = async () => {
 export default loadData;
 
 // Execute the function
-// loadData();
+loadData();
 
 // Function to search for documents
 const getDocuments = async () => {
   try {
     const searchResults = await typesense
-      .collections("artists")
+      .collections("unique_artists")
       .documents()
       .search({
         q: "*", // Query for all documents
@@ -121,11 +121,11 @@ const getDocuments = async () => {
   }
 };
 
-getDocuments();
+// getDocuments();
 
 const deleteCollection = async () => {
   try {
-    await typesense.collections("artists").delete();
+    await typesense.collections("unique_artists").delete();
 
     console.log("Collection deleted.");
   } catch (err) {

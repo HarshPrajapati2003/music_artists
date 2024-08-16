@@ -50,7 +50,7 @@ const Search = () => {
         page: page,
       };
       const res = await client
-        .collections("artists")
+        .collections("unique_artists")
         .documents()
         .search(searchParameters);
 
@@ -84,7 +84,7 @@ const Search = () => {
         per_page: 50,
       };
       const res = await client
-        .collections("artists")
+        .collections("unique_artists")
         .documents()
         .search(searchParameters);
       const artists = res.hits.map((hit) => hit.document);
@@ -113,7 +113,7 @@ const Search = () => {
             per_page: 5, // Limit the number of suggestions
           };
           const res = await client
-            .collections("artists")
+            .collections("unique_artists")
             .documents()
             .search(searchParameters);
           const suggestions = res.hits.map((hit) => hit.document.artist_names);

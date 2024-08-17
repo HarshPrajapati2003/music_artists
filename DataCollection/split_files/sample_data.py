@@ -1,0 +1,1 @@
+artists_data = {'Coldplay': 'United Kingdom', 'Radiohead': 'United Kingdom', 'Red Hot Chili Peppers': 'United States', 'Rihanna': 'United States', 'Eminem': 'United States', 'The Killers': 'United States', 'Kanye West': 'United States', 'Nirvana': 'United States', 'Muse': 'United Kingdom'}

@@ -100,7 +100,7 @@ const loadData = async () => {
 export default loadData;
 
 // Execute the function
-loadData();
+// loadData();
 
 // Function to search for documents
 const getDocuments = async () => {

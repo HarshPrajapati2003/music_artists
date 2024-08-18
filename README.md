@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Music Artists Search Platform
 
 This project is a comprehensive platform that allows users to search for music artists by name. The search functionality is enhanced with real-time auto-suggestions, handling common typos, misspellings and abbreviations.
@@ -60,4 +61,3 @@ The data was sourced by scraping the Spotify API, ensuring a diverse and compreh
   <img src="https://github.com/user-attachments/assets/5dc26f2a-ce17-4ce5-aac5-569fcfcd4600" alt="Auto-suggestions Example" width="230">
   <img src="https://github.com/user-attachments/assets/659549a4-2318-4040-9be3-d162ea5cfc89" alt="Auto-suggestions Example" width="230">
   <img src="https://github.com/user-attachments/assets/3e1b1ba7-a60d-4d19-8f0e-bbd6acc83bd0" alt="Auto-suggestions Example" width="230">
-

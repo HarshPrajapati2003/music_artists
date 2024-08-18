@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Music Artists Search Platform
 
 This project is a comprehensive platform that allows users to search for music artists by name. The search functionality is enhanced with real-time auto-suggestions, handling common typos, misspellings and abbreviations.

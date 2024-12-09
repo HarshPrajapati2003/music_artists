@@ -5,16 +5,13 @@ This project is a comprehensive platform that allows users to search for music a
 ## 🎯 Objective
 The objective of this project was to compile a dataset of at least 100,000 music artists and develop a search backend and frontend interface that allows users to search for artists with auto-suggestions for highly matching names.
 
-## 🚀 Project Links
-- **Live Demo:** [https://music-artists-rust.vercel.app/](https://music-artists-rust.vercel.app/)
-
 ## 💻 Technologies and Resources Used
 
 | **Category**         | **Technologies/Resources Used**                    |
 |----------------------|----------------------------------------------------|
 | **Frontend**         | React.js, Tailwind CSS                             |
 | **Backend**          | Node.js, Express.js                                |
-| **Database**         | Initially MongoDB, later switched to Typesense     |
+| **Database**         | Typesense                                          |
 | **Data Filtering**   | Pandas, Python                                     |
 
 ## 🎨 Features
